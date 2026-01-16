@@ -1,11 +1,26 @@
-<div align="center">
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+# Credit Risk Prediction Project
 
-  <h1>Built with AI Studio</h2>
+**Author:** Anish Choudhary
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Project Goals
+End-to-end classification system for predicting the likelihood of loan default.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Structure
+- `data/`: Raw and processed datasets.
+- `notebooks/`: EDA, Preprocessing, and Modeling workflows.
+- `src/`: Reusable python modules for production.
+- `app/`: Streamlit dashboard.
+- `models/`: Saved `joblib` artifacts.
 
-</div>
+## Quick Start
+1. **Setup**: `pip install -r requirements.txt`
+2. **Train**: (Run the notebooks in `notebooks/` folder)
+3. **Run App**: `streamlit run app/streamlit_app.py`
+4. **Test**: `pytest`
+
+## Docker
+```bash
+docker build -t credit-risk-app .
+docker run -p 8501:8501 credit-risk-app
+```

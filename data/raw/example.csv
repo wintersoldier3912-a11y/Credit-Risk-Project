@@ -1,0 +1,7 @@
+
+income,employment_type,loan_amount,loan_duration_months,credit_score,age,previous_defaults,target
+5000,Salaried,15000,36,710,34,0,0
+3000,Self-employed,20000,60,620,28,1,1
+8000,Salaried,5000,12,780,45,0,0
+2000,Unemployed,10000,24,580,22,2,1
+4500,Other,12000,48,690,31,0,0

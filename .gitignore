@@ -1,0 +1,10 @@
+
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+data/processed/*
+!data/processed/.gitkeep
+models/*.pkl
+.env
+.pytest_cache/
