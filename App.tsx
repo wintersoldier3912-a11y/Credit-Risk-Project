@@ -7,11 +7,16 @@ import {
   LayoutIcon, 
   BookOpenIcon,
   ShieldCheckIcon,
-  BarChart3Icon
+  BarChart3Icon,
+  AlertTriangleIcon,
+  CheckCircle2Icon,
+  Loader2Icon
 } from 'lucide-react';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('readme');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [predictionResult, setPredictionResult] = useState<{ risk: string, prob: number } | null>(null);
 
   const files = [
     { path: 'data/raw/example.csv', type: 'data' },
@@ -24,8 +29,25 @@ const App: React.FC = () => {
     { path: 'Dockerfile', type: 'config' },
   ];
 
+  const handleAnalyze = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsAnalyzing(true);
+    setPredictionResult(null);
+
+    // Simulate model inference delay
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      // Randomly determine risk for mockup purposes
+      const prob = Math.random();
+      setPredictionResult({
+        risk: prob > 0.5 ? 'High Risk' : 'Low Risk',
+        prob: parseFloat(prob.toFixed(2))
+      });
+    }, 1200);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col font-sans text-gray-900">
+    <div className="min-h-screen flex flex-col font-sans text-gray-900 bg-gray-50">
       {/* Header */}
       <header className="bg-indigo-700 text-white p-6 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
@@ -78,7 +100,7 @@ const App: React.FC = () => {
               </p>
               
               <h3 className="text-xl font-semibold mb-3">Model Performance</h3>
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
                   <div className="text-sm text-green-600 font-bold">ROC-AUC</div>
                   <div className="text-2xl font-mono">0.892</div>
@@ -99,7 +121,7 @@ const App: React.FC = () => {
               </p>
 
               <h3 className="text-xl font-semibold mb-3">How to run</h3>
-              <div className="bg-gray-900 text-gray-300 p-4 rounded-lg font-mono text-sm leading-relaxed">
+              <div className="bg-gray-900 text-gray-300 p-4 rounded-lg font-mono text-sm leading-relaxed overflow-x-auto">
                 # Install dependencies<br/>
                 pip install -r requirements.txt<br/><br/>
                 # Run Tests<br/>
@@ -113,25 +135,25 @@ const App: React.FC = () => {
           {activeTab === 'structure' && (
             <div>
               <h2 className="text-2xl font-bold mb-6">Repository Blueprint</h2>
-              <div className="space-y-4">
-                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                  <span className="font-mono text-indigo-600 font-bold">/src</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 transition-colors">
+                  <span className="font-mono text-indigo-600 font-bold block mb-1">/src</span>
                   <p className="text-sm text-gray-500">Core logic for feature engineering, data loading, and model evaluation.</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                  <span className="font-mono text-indigo-600 font-bold">/notebooks</span>
+                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 transition-colors">
+                  <span className="font-mono text-indigo-600 font-bold block mb-1">/notebooks</span>
                   <p className="text-sm text-gray-500">Jupyter notebooks for EDA and incremental experiments.</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                  <span className="font-mono text-indigo-600 font-bold">/reports</span>
+                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 transition-colors">
+                  <span className="font-mono text-indigo-600 font-bold block mb-1">/reports</span>
                   <p className="text-sm text-gray-500">Generated Sweetviz data profiles and SHAP interpretation plots.</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                  <span className="font-mono text-indigo-600 font-bold">/app</span>
+                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 transition-colors">
+                  <span className="font-mono text-indigo-600 font-bold block mb-1">/app</span>
                   <p className="text-sm text-gray-500">The Streamlit application code for user interface.</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                  <span className="font-mono text-indigo-600 font-bold">/models</span>
+                <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 transition-colors">
+                  <span className="font-mono text-indigo-600 font-bold block mb-1">/models</span>
                   <p className="text-sm text-gray-500">Serialized .pkl artifacts for the preprocessor and model.</p>
                 </div>
               </div>
@@ -139,27 +161,87 @@ const App: React.FC = () => {
           )}
 
           {activeTab === 'demo' && (
-            <div className="max-w-md mx-auto border rounded-xl p-6 shadow-xl bg-white">
-              <div className="text-center mb-6 border-b pb-4">
-                <h3 className="text-lg font-bold text-indigo-700">Credit Risk Predictor</h3>
-                <p className="text-xs text-gray-400">Streamlit Mockup</p>
+            <div className="max-w-xl mx-auto flex flex-col items-center">
+              <div className="w-full border rounded-xl shadow-2xl bg-white overflow-hidden">
+                <div className="bg-indigo-50 border-b p-4 text-center">
+                  <h3 className="text-lg font-bold text-indigo-700 flex items-center justify-center gap-2">
+                    <ShieldCheckIcon size={20} /> Credit Risk Analyzer
+                  </h3>
+                  <p className="text-[10px] uppercase tracking-widest text-indigo-400 font-bold">Interactive Frontend Mockup</p>
+                </div>
+                
+                <div className="p-6">
+                  <form onSubmit={handleAnalyze} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Monthly Income ($)</label>
+                        <input type="number" defaultValue="5000" className="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Loan Amount ($)</label>
+                        <input type="number" defaultValue="15000" className="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Credit Score</label>
+                        <input type="number" defaultValue="720" max="850" min="300" className="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Age</label>
+                        <input type="number" defaultValue="34" className="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none" required />
+                      </div>
+                    </div>
+                    
+                    <button 
+                      type="submit"
+                      disabled={isAnalyzing}
+                      className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2Icon size={20} className="animate-spin" />
+                          Running Pipeline...
+                        </>
+                      ) : 'Analyze Risk Profile'}
+                    </button>
+                  </form>
+
+                  {/* Dynamic Result Area */}
+                  {predictionResult && (
+                    <div className={`mt-8 p-6 rounded-xl border-2 animate-in fade-in slide-in-from-bottom-4 duration-500 ${predictionResult.risk === 'High Risk' ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                       <div className="flex items-start gap-4">
+                         {predictionResult.risk === 'High Risk' ? (
+                           <AlertTriangleIcon className="text-red-600 shrink-0" size={32} />
+                         ) : (
+                           <CheckCircle2Icon className="text-green-600 shrink-0" size={32} />
+                         )}
+                         <div className="flex-1">
+                            <h4 className={`text-xl font-bold ${predictionResult.risk === 'High Risk' ? 'text-red-800' : 'text-green-800'}`}>
+                              {predictionResult.risk}
+                            </h4>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Probability of default: <span className="font-mono font-bold">{(predictionResult.prob * 100).toFixed(0)}%</span>
+                            </p>
+                            
+                            <div className="mt-4 flex flex-col gap-2">
+                              <div className="text-xs font-bold uppercase text-gray-400">Key Risk Drivers (Simulated)</div>
+                              <div className="flex flex-wrap gap-2">
+                                <span className="bg-white px-2 py-1 rounded border text-xs text-gray-600">Credit Score: 720</span>
+                                <span className="bg-white px-2 py-1 rounded border text-xs text-gray-600">DTI: 3.0</span>
+                                <span className="bg-white px-2 py-1 rounded border text-xs text-gray-600">Age: 34</span>
+                              </div>
+                            </div>
+                         </div>
+                       </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-4 bg-gray-50 border-t flex justify-between items-center text-[10px] text-gray-400">
+                  <span>ML Artifacts: Loaded (Mock)</span>
+                  <span>Model: XGBClassifier v2.0.0</span>
+                </div>
               </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase">Monthly Income</label>
-                  <input type="number" className="w-full border p-2 rounded bg-gray-50" placeholder="5000" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase">Credit Score</label>
-                  <input type="number" className="w-full border p-2 rounded bg-gray-50" placeholder="720" />
-                </div>
-                <button className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition">
-                  Analyze Risk
-                </button>
-                <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg hidden">
-                   <div className="text-red-700 font-bold">Result: High Risk (0.87)</div>
-                </div>
-              </div>
+              <p className="mt-4 text-xs text-gray-400 italic">This is a functional React mockup. Run `streamlit run app/streamlit_app.py` for the real backend-connected experience.</p>
             </div>
           )}
         </main>

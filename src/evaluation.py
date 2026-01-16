@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import shap
 import os
+import numpy as np
+import base64
+from io import BytesIO
 from sklearn.metrics import (
     classification_report, roc_auc_score, confusion_matrix, 
     precision_recall_curve, roc_curve
@@ -44,7 +47,7 @@ def generate_shap_plots(model, X_processed, feature_names, output_path='reports/
         shap_values = explainer.shap_values(X_processed)
     except:
         explainer = shap.Explainer(model, X_processed)
-        shap_values = explainer(X_processed)
+        shap_values = explainer(X_processed).values
 
     plt.figure(figsize=(10, 6))
     shap.summary_plot(shap_values, X_processed, feature_names=feature_names, show=False)
@@ -52,3 +55,40 @@ def generate_shap_plots(model, X_processed, feature_names, output_path='reports/
     plt.savefig(output_path)
     plt.close()
     return shap_values
+
+def get_individual_force_plot(model, X_single_row, feature_names):
+    """
+    Generates a SHAP force plot for a single instance and returns the HTML representation.
+    """
+    try:
+        explainer = shap.TreeExplainer(model)
+        expected_value = explainer.expected_value
+        
+        # For classifiers, expected_value might be a list or array (per class)
+        if isinstance(expected_value, (list, np.ndarray)) and len(expected_value) > 1:
+            expected_value = expected_value[1]
+            
+        shap_values = explainer.shap_values(X_single_row)
+        if isinstance(shap_values, list) and len(shap_values) > 1:
+            shap_values = shap_values[1]
+            
+    except Exception:
+        # Fallback to general Explainer
+        explainer = shap.Explainer(model)
+        shap_result = explainer(X_single_row)
+        expected_value = shap_result.base_values[0]
+        shap_values = shap_result.values[0]
+
+    # Ensure JS is initialized for the plot
+    shap.initjs()
+    plot = shap.force_plot(
+        expected_value, 
+        shap_values, 
+        X_single_row, 
+        feature_names=feature_names,
+        matplotlib=False
+    )
+    
+    # Bundle the JS and the plot HTML
+    plot_html = f"<html><head>{shap.getjs()}</head><body>{plot.html()}</body></html>"
+    return plot_html
